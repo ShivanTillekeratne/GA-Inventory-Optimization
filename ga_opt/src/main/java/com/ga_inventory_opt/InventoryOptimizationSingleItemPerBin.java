@@ -1,3 +1,5 @@
+package com.ga_inventory_opt;
+
 import io.jenetics.*;
 import io.jenetics.engine.*;
 import io.jenetics.util.*;
