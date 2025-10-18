@@ -28,10 +28,23 @@ public class InventoryOptimizationSingleItemPerBin {
 
     // ---------- Fitness Function ----------
     private static double fitness(Genotype<DoubleGene> gt) {
+
+        // weight W (importance of value vs area)
+        final double W = 0.9;
+        
         DoubleChromosome chromosome = (DoubleChromosome) gt.chromosome();
+
+        // denominators
+        double totalInventoryPrice = 0.0;
+        for (int i = 0; i < NUM_ITEMS; i++) {
+            totalInventoryPrice += items[i][2];
+        }
+        double totalBinArea = NUM_BINS * BIN_WIDTH * BIN_HEIGHT;
+
+        // Numerators
         boolean[] binUsed = new boolean[NUM_BINS];
-        double totalCost = 0.0;
-        double penalty = 0.0;
+        double priceOfStoredProducts = 0.0;
+        double areaOfStoredProducts = 0.0;
 
         for (int i = 0; i < NUM_ITEMS; i++) {
             int binIndex = (int) Math.round(chromosome.get(i).doubleValue()) % NUM_BINS;
@@ -39,25 +52,21 @@ public class InventoryOptimizationSingleItemPerBin {
             double itemH = items[i][1];
             double price = items[i][2];
 
-            // If bin already occupied, penalize heavily
-            if (binUsed[binIndex]) {
-                penalty += 200.0;
-                continue;
-            }
-
-            binUsed[binIndex] = true;
-
-            // If item doesn't fit in bin, penalize
-            if (itemW > BIN_WIDTH || itemH > BIN_HEIGHT) {
-                penalty += 100.0;
-            } else {
-                totalCost += price;
+            // Check if the item is successfully stored
+            if (!binUsed[binIndex] && itemW <= BIN_WIDTH && itemH <= BIN_HEIGHT) {
+                priceOfStoredProducts += price;
+                areaOfStoredProducts += itemW * itemH;
+                binUsed[binIndex] = true;
             }
         }
 
-        // Fitness: lower cost & fewer penalties = higher fitness
-        double totalPenalty = totalCost + penalty;
-        return 1.0 / (1.0 + totalPenalty);
+        // Normalized scores
+        double valueScore = (totalInventoryPrice == 0) ? 0.0 : priceOfStoredProducts / totalInventoryPrice;
+        double areaScore = (totalBinArea == 0) ? 0.0 : areaOfStoredProducts / totalBinArea;
+
+        // Core formula
+        double F = (W + 1) * valueScore + (1 - W) * areaScore;
+        return F;
     }
 
     // ---------- Main ----------
