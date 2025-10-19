@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ga_inventory_opt.InventoryOptimizationItemPerBin.Bin;
-import com.ga_inventory_opt.InventoryOptimizationItemPerBin.Item;
-import com.ga_inventory_opt.InventoryOptimizationItemPerBin.OptimizationResult;
+import com.ga_inventory_opt.InventoryOptimizationWithPositions.Bin;
+import com.ga_inventory_opt.InventoryOptimizationWithPositions.Item;
+import com.ga_inventory_opt.InventoryOptimizationWithPositions.OptimizationResult;
 
 public class RunOptimizer {
     Map<Integer, Map<Integer, Integer>> run(List<ItemType> itemTypes, List<BinType> binTypes, double fitnessWeight, int populationSize, int maxGenerations) {
@@ -32,7 +32,7 @@ public class RunOptimizer {
         }
 
         // Create optimizer and configure
-        InventoryOptimizationItemPerBin internalOptimizer = new InventoryOptimizationItemPerBin();
+        InventoryOptimizationWithPositions internalOptimizer = new InventoryOptimizationWithPositions();
         internalOptimizer.setWeightW(fitnessWeight);
         internalOptimizer.setPopulationSize(populationSize);
         internalOptimizer.setMaxGenerations(maxGenerations);
