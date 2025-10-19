@@ -1,5 +1,6 @@
 package com.ga_inventory_opt;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,9 +17,8 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.util.Factory;
 
-public class InventoryOptimizationSingleItemPerBin {
-
-    // ---------- Inner Classes for Data Transfer ----------
+public class InventoryOptimizationWithPositions {
+       // ---------- Inner Classes for Data Transfer ----------
     public static class Item {
         public final int number;
         public final double width;
@@ -365,14 +365,6 @@ public class InventoryOptimizationSingleItemPerBin {
             double height = 2.0 + random.nextDouble() * 48.0;
             bins.add(new Bin(i + 1, width, height));
         }
-        
-        // Create optimizer instance and run
-        InventoryOptimizationSingleItemPerBin optimizer = new InventoryOptimizationSingleItemPerBin();
-        optimizer.setWeightW(0.7);
-        optimizer.setPopulationSize(120);
-        optimizer.setMaxGenerations(150);
-        
-        OptimizationResult result = optimizer.optimize(items, bins);
-        optimizer.printResult(result, items, bins);
+
     }
 }

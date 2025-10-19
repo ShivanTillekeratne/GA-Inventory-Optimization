@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ga_inventory_opt.InventoryOptimizationSingleItemPerBin.Bin;
-import com.ga_inventory_opt.InventoryOptimizationSingleItemPerBin.Item;
-import com.ga_inventory_opt.InventoryOptimizationSingleItemPerBin.OptimizationResult;
+import com.ga_inventory_opt.InventoryOptimizationItemPerBin.Bin;
+import com.ga_inventory_opt.InventoryOptimizationItemPerBin.Item;
+import com.ga_inventory_opt.InventoryOptimizationItemPerBin.OptimizationResult;
 
 public class TestOptimizer {
     
@@ -30,9 +30,9 @@ public class TestOptimizer {
         bins.add(new Bin(4, 25.0, 35.0));
 
         // Create optimizer and configure
-        InventoryOptimizationSingleItemPerBin optimizer = new InventoryOptimizationSingleItemPerBin();
+        InventoryOptimizationItemPerBin optimizer = new InventoryOptimizationItemPerBin();
         optimizer.setWeightW(0.75);
-        optimizer.setPopulationSize(120);
+        optimizer.setPopulationSize(1200);
         optimizer.setMaxGenerations(150);
 
         System.out.println("Starting inventory optimization...\n");
@@ -66,9 +66,9 @@ public class TestOptimizer {
         //     System.out.println("Bin " + (i + 1) + ": " + processedBins.get(i));
         // }
 
-        Map<String, List<Integer>> binMap = new HashMap<>();
+        Map<Integer, List<Integer>> binMap = new HashMap<>();
         for (int i = 0; i < processedBins.size(); i++) {
-            binMap.put("bin" + (i + 1), processedBins.get(i));
+            binMap.put((i + 1), processedBins.get(i));
         }
 
         // Example usage:
