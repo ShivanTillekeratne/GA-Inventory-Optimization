@@ -1,6 +1,6 @@
 import subprocess, json
 
-JAR_NAME = 'target/optimizer-1.0.jar'
+JAR_NAME = 'ga_opt/target/optimizer-1.0.jar'
 
 def call_java_optimizer(params, jar_path=JAR_NAME):
     process = subprocess.Popen(
@@ -16,15 +16,15 @@ def call_java_optimizer(params, jar_path=JAR_NAME):
 
     if stderr:
         print("Java error:", stderr)
-
+    return stdout
     return json.loads(stdout)
 
 out = call_java_optimizer(
             {
-          "items": [
-            {"number": 1, "width": 5.0, "height": 3.0, "price": 25.0, "qty": 2}
+          "itemTypes": [
+            {"number": 1, "width": 5.0, "height": 3.0, "price": 25.0, "quantity": 2}
           ],
-          "bins": [
+          "binTypes": [
             {"number": 1, "width": 20.0, "height": 30.0}
           ]
         }

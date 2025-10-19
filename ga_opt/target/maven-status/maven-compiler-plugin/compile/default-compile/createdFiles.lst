@@ -1,6 +1,12 @@
 com\ga_inventory_opt\RunOptimizer$OptimizationInput.class
-com\ga_inventory_opt\RunOptimizer$Optimizer.class
-com\ga_inventory_opt\InventoryOptimizationSingleItemPerBin.class
+com\ga_inventory_opt\InventoryOptimizationItemPerBin$Item.class
+com\ga_inventory_opt\InventoryOptimizationItemPerBin$Bin.class
+com\ga_inventory_opt\InventoryOptimizationWithPositions$Bin.class
 com\ga_inventory_opt\RunOptimizer.class
-com\ga_inventory_opt\RunOptimizer$Item.class
-com\ga_inventory_opt\RunOptimizer$Bin.class
+com\ga_inventory_opt\InventoryOptimizationItemPerBin$OptimizationResult.class
+com\ga_inventory_opt\InventoryOptimizationWithPositions$Item.class
+com\ga_inventory_opt\InventoryOptimizationItemPerBin.class
+com\ga_inventory_opt\InventoryOptimizationWithPositions$OptimizationResult.class
+com\ga_inventory_opt\TestOptimizer.class
+com\ga_inventory_opt\RunOptimizer$ItemType.class
+com\ga_inventory_opt\InventoryOptimizationWithPositions.class
