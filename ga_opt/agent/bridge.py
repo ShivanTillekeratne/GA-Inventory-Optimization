@@ -1,8 +1,8 @@
 import subprocess, json
 
-JAR_NAME = 'ga_opt/target/optimizer-1.0.jar'
+JAR_PATH = 'ga_opt/jar/optimizer-1.0.jar'
 
-def call_java_optimizer(params, jar_path=JAR_NAME):
+def call_java_optimizer(params, jar_path=JAR_PATH):
     process = subprocess.Popen(
         ['java', '-jar', jar_path],
         stdin=subprocess.PIPE,
@@ -16,8 +16,15 @@ def call_java_optimizer(params, jar_path=JAR_NAME):
 
     if stderr:
         print("Java error:", stderr)
-    return stdout
-    return json.loads(stdout)
+    if stdout.strip() == "":
+        raise RuntimeError("No output from Java optimizer")
+    try:
+        json_data = json.loads(stdout)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Invalid JSON output from Java optimizer: {e}\nOutput was: {stdout}")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error while parsing JSON output: {e}\nOutput was: {stdout}")
+    return json_data
 
 if __name__ == "__main__":
     out = call_java_optimizer(
