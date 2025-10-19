@@ -1,0 +1,6 @@
+com\ga_inventory_opt\RunOptimizer$OptimizationInput.class
+com\ga_inventory_opt\RunOptimizer$Optimizer.class
+com\ga_inventory_opt\InventoryOptimizationSingleItemPerBin.class
+com\ga_inventory_opt\RunOptimizer.class
+com\ga_inventory_opt\RunOptimizer$Item.class
+com\ga_inventory_opt\RunOptimizer$Bin.class
