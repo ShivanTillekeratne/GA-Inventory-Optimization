@@ -4,6 +4,7 @@ from typing import List
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, function_tool
 from dotenv import load_dotenv
+from bridge import call_java_optimizer
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -65,8 +66,8 @@ class WarehouseAgent:
 User input: {user_text}
 
 Return a JSON object with:
-- items: array of objects with number, width, height, price, quantity
-- bins: array of objects with number, width, height
+- itemTypes: array of objects with number, width, height, price, quantity
+- binTypes: array of objects with number, width, height
 
 Be precise with number extraction and assign sequential numbers starting from 1."""
         )
@@ -117,7 +118,7 @@ Be precise with number extraction and assign sequential numbers starting from 1.
 Allocation data:
 {formatted_data}
 
-Create a table with columns 'Bin' and 'Items'. Each row should show the bin name and its assigned items as a comma-separated list.
+Create a table with columns 'Bin' and 'Items'. Each row should show the bin name and its assigned items as a comma-separated list. if the same time is there show them as multiplication. mention them as 'item1'x4, 'item2'x1, 'item3'x2 likewise.
 Return ONLY the markdown table, no other text."""
         )
         
@@ -157,6 +158,15 @@ def collect_input_with_loops() -> str:
     
     return full_description
 
+def convert_nested_dict_to_java_hashmap(data: dict) -> str:
+    result_parts = []
+    for bin_num, items in data.items():
+        expanded_items = []
+        for item_num, quantity in items.items():
+            expanded_items.extend([str(item_num)] * quantity)
+        bin_str = f"bin{bin_num}=[{', '.join(expanded_items)}]"
+        result_parts.append(bin_str)
+    return "{ " + ", ".join(result_parts) + " }"
 
 if __name__ == "__main__":
     print("--- Starting Input Processing Workflow with OpenAI Agents SDK ---")
@@ -171,18 +181,20 @@ if __name__ == "__main__":
         # Parse input using the agent
         parsed_data = warehouse_agent.parse_user_input_to_json(user_input_text)
         
-        print("\n--- Parsed JSON Data ---")
-        print(json.dumps(parsed_data, indent=2))
+        # print("\n--- Parsed JSON Data ---")
+        # print(json.dumps(parsed_data, indent=2))
         print("----------------------\n")
         
         print("Data has been sent to the optimization function...")
-        
+        java_output={}
+        java_output = call_java_optimizer(parsed_data)
+        java_output = convert_nested_dict_to_java_hashmap(java_output)
+
         # Simulate optimization output
-        dummy_optimization_output = "{bin1=[1, 4, 6], bin2=[2, 5, 8], bin3=[3], bin4=[7]}"
-        print(f"Status: Optimization complete. Result: {dummy_optimization_output}\n")
+        # print(f"Status: Optimization complete. Result: {java_output}\n")
         
         # Generate visualization using the same agent
-        markdown_table = warehouse_agent.create_markdown_table(dummy_optimization_output)
+        markdown_table = warehouse_agent.create_markdown_table(java_output)
         
         print("--- Generated Visualization ---")
         print(markdown_table)
