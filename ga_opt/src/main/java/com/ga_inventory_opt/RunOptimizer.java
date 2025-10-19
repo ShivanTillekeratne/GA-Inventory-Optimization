@@ -17,6 +17,7 @@ public class RunOptimizer {
         public double width;
         public double height;
         public double price;
+
     }
     static class Bin {
         public int number;
@@ -29,7 +30,6 @@ public class RunOptimizer {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Running Jenetics Optimizer...");
         ObjectMapper mapper = new ObjectMapper();
 
         // Read JSON input from stdin

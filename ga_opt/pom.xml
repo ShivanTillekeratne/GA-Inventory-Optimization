@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.ga_inventory_opt</groupId>
-  <artifactId>ga_opt</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>optimizer</artifactId>
+  <version>1.0</version>
 
   <name>ga_opt</name>
   <!-- FIXME change it to the project's website -->
