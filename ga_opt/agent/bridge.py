@@ -27,6 +27,7 @@ def call_java_optimizer(params, jar_path=JAR_PATH):
     return json_data
 
 if __name__ == "__main__":
+    from pprint import pprint
     out = call_java_optimizer(
                 {
               "itemTypes": [
@@ -43,4 +44,4 @@ if __name__ == "__main__":
               ]
             }
     )
-    print(out)
+    pprint(out)
