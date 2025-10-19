@@ -12,14 +12,16 @@ import com.ga_inventory_opt.InventoryOptimizationItemPerBin.Item;
 import com.ga_inventory_opt.InventoryOptimizationItemPerBin.OptimizationResult;
 
 public class RunOptimizer {
-    Map<Integer, List<Integer>> run(List<ItemType> itemTypes, List<BinType> binTypes, double fitnessWeight, int populationSize, int maxGenerations) {
+    Map<Integer, Map<Integer, Integer>> run(List<ItemType> itemTypes, List<BinType> binTypes, double fitnessWeight, int populationSize, int maxGenerations) {
         List<Item> items = new ArrayList<>();
+        Map<Integer, Integer> itemToType = new HashMap<>();  // itemId to itemTypeNumber
         int itemIndex = 0;
         for (ItemType itemType : itemTypes) {
-            itemIndex++;
             for (int i = 0; i < itemType.quantity; i++) {
+                itemIndex++;
                 Item item = new Item(itemIndex, itemType.width, itemType.height, itemType.price);
                 items.add(item);
+                itemToType.put(itemIndex, itemType.number);
             }
         }
         // To avoid type conversion issue
@@ -53,7 +55,35 @@ public class RunOptimizer {
             binMap.put((i + 1), processedBins.get(i));
         }
 
-        return binMap;
+        // MAPPING LOGIC: Bin to Type Counts
+        // =================================
+        // Item to type
+        Map<Integer, Map<Integer, Integer>> binToTypeCounts = new HashMap<>();
+
+        // Iterate over each entry (binId, itemList) in the first map
+        for (Map.Entry<Integer, List<Integer>> binEntry : binMap.entrySet()) {
+            Integer binId = binEntry.getKey();
+            List<Integer> itemsInBin = binEntry.getValue();
+
+            // Create a temporary map to hold type counts for THIS bin only
+            Map<Integer, Integer> typeCountsInBin = new HashMap<>();
+
+            // Now, iterate over the items within the current bin
+            for (Integer itemId : itemsInBin) {
+                Integer type = itemToType.get(itemId);
+
+                // Check if the type exists to avoid errors
+                if (type != null) {
+                    // Increment the count for this type.
+                    // getOrDefault is a clean way to handle the first time we see a type.
+                    typeCountsInBin.put(type, typeCountsInBin.getOrDefault(type, 0) + 1);
+                }
+            }
+            // Add the completed type counts map for the bin to our final result
+            binToTypeCounts.put(binId, typeCountsInBin);
+        }
+
+        return binToTypeCounts;
     }
     static class ItemType {
         public int number;
@@ -82,7 +112,7 @@ public class RunOptimizer {
 
         // Run Jenetics algorithm
         RunOptimizer optimizer = new RunOptimizer();
-        Map<Integer, List<Integer>> itemToBinAssignment = optimizer.run(input.itemTypes, input.binTypes, 0.75, 1200, 150);
+        Map<Integer, Map<Integer, Integer>> itemToBinAssignment = optimizer.run(input.itemTypes, input.binTypes, 0.75, 1200, 150);
 
         // Output JSON result
         mapper.writeValue(System.out, itemToBinAssignment);
