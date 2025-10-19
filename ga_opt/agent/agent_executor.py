@@ -10,73 +10,151 @@ if not GOOGLE_API_KEY:
 genai.configure(api_key=GOOGLE_API_KEY)
 
 
-class GeneticAlgorithmPlanner:
-    # This class will contain all the logic for the Genetic Algorithm. 
-    
-    def _init_(self):
-        pass
+class InputProcessor:
+    def __init__(self):
+        self.parser_model = genai.GenerativeModel('gemini-2.5-pro')
 
-    def generate_optimal_plan(self):
-        
-        print("Running Genetic Algorithm to find optimal plan...")
-        
-        dummy_plan = """
-        Execute the following packing plan by calling the correct tools for each step:
-        1. Place item 'A1' in 'Bin_1' at position (0, 0).
-        2. Place item 'B3' in 'Bin_1' at position (15, 0).
-        3. Check the current inventory status.
-        4. Place item 'C2' in 'Bin_2' at position (0, 0).
+    def parse_user_input_to_json(self, user_text: str):
+        json_schema = {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "number": {"type": "integer"},
+                            "width": {"type": "number"},
+                            "height": {"type": "number"},
+                            "price": {"type": "number"},
+                            "quantity": {"type": "integer"},
+                        },
+                        "required": ["number", "width", "height", "price", "quantity"]
+                    }
+                },
+                "bins": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "number": {"type": "integer"},
+                            "width": {"type": "number"},
+                            "height": {"type": "number"},
+                        },
+                        "required": ["number", "width", "height"]
+                    }
+                }
+            }
+        }
+        prompt = f"""
+        Parse the following user input into a valid JSON object based on the provided schema.
+        Assign a unique number (starting from 1) to each item type and bin.
+
+        USER INPUT: "{user_text}"
         """
-        
-        return dummy_plan
-
-class WarehouseEnvironment:
-    
-    def place_item_in_bin(self, item_id: str, bin_id: str, position_x: int, position_y: int):
-        
-        print(f"ACTION: Placing item '{item_id}' in bin '{bin_id}' at coordinates ({position_x}, {position_y}).")
-        
-        return json.dumps({"status": "success", "item_placed": item_id})
-        
-
-    def report_inventory_status(self):
-        
-        print("ACTION: Checking inventory status.")
-        # For example, you might have: return self.warehouse_state.get_summary()
-        return json.dumps({"bins_used": 2, "items_placed": 3, "remaining_capacity": "45%"})
-
-class AgentExecutor:
-    
-    def _init_(self, environment_tools):
-        print("Initializing Gemini agent...")
-        self.model = genai.GenerativeModel(
-            model_name='gemini-2.5-pro',
-            tools=environment_tools  
+        response = self.parser_model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=json_schema
+            )
         )
-        self.convo = self.model.start_chat(enable_automatic_function_calling=True)
-
-    def run(self, plan_text: str):
-        print("Sending packing plan to the agent for execution...")
-        response = self.convo.send_message(plan_text)
-        final_response = response.text
-        print(f"Agent's final confirmation: {final_response}")
+        return json.loads(response.text)
 
 
+class VisualizationGenerator:
+    def __init__(self):
+        self.visualizer_model = genai.GenerativeModel('gemini-2.5-pro')
 
-if __name__ == "_main_":
-    print("--- Starting Warehouse Optimization Workflow ---")
+    def parse_java_hashmap(self, hashmap_str):
+        
+        hashmap_str = hashmap_str.strip().replace("{", "").replace("}", "")
+        parts = hashmap_str.split("],")
+        hashmap_dict = {}
+        for part in parts:
+            part = part.strip()
+            if "=" in part:
+                key, val = part.split("=", 1)
+                key = key.strip()
+                val = val.strip().replace("[", "").replace("]", "")
+                items = [x.strip() for x in val.split(",") if x.strip()]
+                hashmap_dict[key] = items
+        return hashmap_dict
 
-    ga_planner = GeneticAlgorithmPlanner()
-    optimal_plan = ga_planner.generate_optimal_plan()
+    def create_markdown_table(self, java_hashmap_str: str):
+        
+        bins_data = self.parse_java_hashmap(java_hashmap_str)
+        
+        prompt = f"""
+                 You are an AI visualization assistant.
+                 Given the following bin-item allocation from a warehouse optimization GA:
 
-    warehouse_env = WarehouseEnvironment()
+                 {bins_data}
 
-    agent_tools = [
-        warehouse_env.place_item_in_bin,
-        warehouse_env.report_inventory_status
-    ]
+                 Generate a clean, simple Markdown-formatted table showing each bin and its assigned items.
+                 Each row should represent one bin.
+                 Label the columns as "Bin" and "Items".
+                 Do not add any other text, just the Markdown table.
+                 """
+        
+        response = self.visualizer_model.generate_content(prompt)
+        return response.text
 
-    agent_executor = AgentExecutor(environment_tools=agent_tools)
-    agent_executor.run(optimal_plan)
 
-    print("\nWorkflow Finished")
+def collect_input_with_loops():
+    item_descriptions = []
+    bin_descriptions = []
+    
+    try:
+        num_items = int(input("How many item types do you have? "))
+        for i in range(num_items):
+            dims = input(f"  Enter dimensions for item #{i+1} (e.g., '5x3'): ")
+            price = input(f"  Enter price for item #{i+1}: ")
+            quantity = input(f"  Enter quantity for item #{i+1}: ")
+            item_descriptions.append(f"item {i+1} is {dims} with a price of {price} and quantity of {quantity}. ")
+    except ValueError:
+        print("Invalid number. Please enter a whole number.")
+        return None
+    
+    try:
+        num_bins = int(input("How many bins do you have? "))
+        for i in range(num_bins):
+            dims = input(f"  Enter dimensions for bin #{i+1} (e.g., '20x30'): ")
+            bin_descriptions.append(f"bin {i+1} is {dims}")
+    except ValueError:
+        print("Invalid number. Please enter a whole number.")
+        return None
+    
+    full_description = f"I have {num_items} item types and {num_bins} bins. "
+    full_description += "The items are: " + ", ".join(item_descriptions) + ". "
+    full_description += "The bins are: " + ", ".join(bin_descriptions) + "."
+    
+    return full_description
+
+
+if __name__ == "__main__":
+    print("--- Starting Input Processing Workflow ---")
+
+    user_input_text = collect_input_with_loops()
+
+    if user_input_text:
+        processor = InputProcessor()
+        parsed_data = processor.parse_user_input_to_json(user_input_text)
+        
+        print("\n--- Parsed JSON Data ---")
+        print(json.dumps(parsed_data, indent=2))
+        print("----------------------\n")
+
+        print("Data has been sent to the optimization function...")
+
+        dummy_optimization_output = "{bin1=[1, 4, 6], bin2=[2, 5, 8], bin3=[3], bin4=[7]}"
+        print(f"Status: Optimization complete. Result: {dummy_optimization_output}\n")
+        
+        visualizer = VisualizationGenerator()
+        markdown_table = visualizer.create_markdown_table(dummy_optimization_output)
+        
+        print("--- Generated Visualization ---")
+        print(markdown_table)
+        print("-----------------------------")
+
+    print("\n--- Workflow Finished ---")
