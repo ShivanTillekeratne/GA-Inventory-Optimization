@@ -18,7 +18,7 @@ class GeneticAlgorithmPlanner:
 
     def generate_optimal_plan(self):
         
-        print("🧬 Running Genetic Algorithm to find optimal plan...")
+        print("Running Genetic Algorithm to find optimal plan...")
         
         dummy_plan = """
         Execute the following packing plan by calling the correct tools for each step:
@@ -34,21 +34,21 @@ class WarehouseEnvironment:
     
     def place_item_in_bin(self, item_id: str, bin_id: str, position_x: int, position_y: int):
         
-        print(f"✅ ACTION: Placing item '{item_id}' in bin '{bin_id}' at coordinates ({position_x}, {position_y}).")
+        print(f"ACTION: Placing item '{item_id}' in bin '{bin_id}' at coordinates ({position_x}, {position_y}).")
         
         return json.dumps({"status": "success", "item_placed": item_id})
         
 
     def report_inventory_status(self):
         
-        print("✅ ACTION: Checking inventory status.")
+        print("ACTION: Checking inventory status.")
         # For example, you might have: return self.warehouse_state.get_summary()
         return json.dumps({"bins_used": 2, "items_placed": 3, "remaining_capacity": "45%"})
 
 class AgentExecutor:
     
     def _init_(self, environment_tools):
-        print("🤖 Initializing Gemini agent...")
+        print("Initializing Gemini agent...")
         self.model = genai.GenerativeModel(
             model_name='gemini-2.5-pro',
             tools=environment_tools  
@@ -56,10 +56,10 @@ class AgentExecutor:
         self.convo = self.model.start_chat(enable_automatic_function_calling=True)
 
     def run(self, plan_text: str):
-        print("📋 Sending packing plan to the agent for execution...")
+        print("Sending packing plan to the agent for execution...")
         response = self.convo.send_message(plan_text)
         final_response = response.text
-        print(f"🤖 Agent's final confirmation: {final_response}")
+        print(f"Agent's final confirmation: {final_response}")
 
 
 
